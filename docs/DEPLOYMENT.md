@@ -47,3 +47,20 @@ Quando o website separado estiver confirmado online, remove a montra
 duplicada do projeto principal apenas através de uma alteração
 independente, que não afete os ficheiros `store.json`, `index.json`,
 `release-status.json` ou `/apps/`.
+
+## Diagnóstico de erros comuns
+
+- **404 no website:** o GitHub Pages ainda não está ativo no repositório.
+  Em `Settings → Pages`, seleciona `GitHub Actions` e executa
+  `Publish MrStore-Web` em `Actions`. O repositório ter HTML na main,
+  por si só, não significa que o URL Pages esteja publicado.
+- **Catálogo indisponível:** verifica o URL técnico
+  `https://mrpiracy94.github.io/MrStore/index.json`.
+  O website oferece `Voltar a verificar o catálogo` após um erro ou timeout.
+- **Aviso de publicação não verificada:** o relatório
+  `https://mrpiracy94.github.io/MrStore/release-status.json`
+  ainda não existe ou não corresponde aos IDs do índice. Não criar um relatório
+  fictício nem desativar a verificação; só a publicação de uma edição aprovada
+  no repositório técnico pode resolver o estado de segurança.
+- **Favotitos/filtros:** os favoritos continuam no `localStorage`.
+  O botão `Limpar filtros` limpa a pesquisa e o estado visual, não os favoritos.
