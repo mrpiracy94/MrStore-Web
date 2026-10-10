@@ -61,3 +61,29 @@ test("banner e logotipo são recursos locais", () => {
   assert.match(html, /\.\/assets\/mrstore-hero\.webp/);
   assert.ok(statSync(new URL("../index.html", import.meta.url)).size > 1000);
 });
+
+test("erros de rede não deixam o site preso em carregamento", () => {
+  assert.match(js, /new AbortController\(\)/);
+  assert.match(js, /controller\.abort\(\)/);
+  assert.match(js, /window\.clearTimeout\(timer\)/);
+  assert.match(js, /retry\.hidden = false/);
+  assert.match(js, /\$\("retry-catalog"\)\.addEventListener\("click", initialize\)/);
+  assert.match(html, /id="retry-catalog"[^>]*hidden/);
+  assert.match(css, /\.catalog-recovery \[hidden\]\{display:none!important\}/);
+});
+
+test("não apresenta aprovação quando o relatório está ausente ou não coincide", () => {
+  assert.match(js, /state\.validated = verifyRelease\(/);
+  assert.match(js, /state\.validated = false/);
+  assert.match(js, /não as interpretes como aprovadas pela auditoria/);
+  assert.match(js, /catalogBase\.origin/);
+});
+
+test("ícones e capturas registam o tratamento de erro antes de carregar a imagem", () => {
+  const imgBlock = js.slice(js.indexOf('const img = document.createElement("img")'),
+                            js.indexOf('return wrap;'));
+  assert.ok(imgBlock.indexOf('img.addEventListener("error"') < imgBlock.indexOf("img.src = src"));
+  const coverBlock = js.slice(js.indexOf('const shot = document.createElement("img")'),
+                              js.indexOf("cover.appendChild(shot)"));
+  assert.ok(coverBlock.indexOf('shot.addEventListener("error"') < coverBlock.indexOf("shot.src = screenshotURL"));
+});
