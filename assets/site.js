@@ -17,8 +17,8 @@
     favoritesOnly: false, limit: BATCH_SIZE, saved: new Set(), validated: false };
   // Catalog stays in the original MrStore repository and is hosted on the same origin.
   const catalogBase = new URL(STORE_URL + "/");
-  // A montra principal publica a seleção editorial de 223 apps.
-  const publicCatalogBase = new URL("https://mrpiracy94.github.io/");
+  // All MrStore frontends share the exact same technical index and app paths.
+  const publicCatalogBase = catalogBase;
   function readFavorites() {
     try {
       const value = JSON.parse(localStorage.getItem("mrstore-favorites-v1") || "[]");
@@ -220,7 +220,8 @@
     });
   }
   function verifyRelease(release, appList) {
-    if (!release || !Array.isArray(release.approved) ||
+    if (!release || release.certification !== "security_scanned" ||
+        !Array.isArray(release.approved) ||
         !Number.isInteger(release.approved_count) ||
         release.approved_count !== release.approved.length ||
         release.approved_count !== appList.length) return false;
@@ -289,9 +290,9 @@
         state.validated = false;
       }
       if (state.validated) {
-        setNotice("Catálogo publicado com seleção consistente com o relatório de verificação. Nenhum scanner garante ausência absoluta de vulnerabilidades; confirma os requisitos antes de instalar.", false);
+        setNotice("Todas as aplicações do catálogo técnico estão disponíveis para exploração. O relatório de segurança corresponde a esta edição, mas não garante instalação ou ausência absoluta de vulnerabilidades.", false);
       } else {
-        setNotice("Catálogo acessível, mas sem relatório de publicação correspondente e verificável. Podes explorar as aplicações, mas não as interpretes como aprovadas pela auditoria de segurança atual.", true);
+        setNotice("Catálogo completo disponível para exploração. Esta edição é editorial e não equivale a uma certificação de segurança ou de instalação.", true);
         retry.hidden = false;
       }
       categoryList();

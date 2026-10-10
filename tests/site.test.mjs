@@ -14,8 +14,10 @@ test("site independente aponta para o catálogo técnico original", () => {
   assert.match(js, /const catalogBase = new URL\(STORE_URL \+ "\/"\)/);
   assert.match(js, /getCatalogJSON\("index\.json"\)/);
   assert.match(js, /getCatalogJSON\("release-status\.json"\)/);
-  assert.match(js, /const publicCatalogBase = new URL\("https:\/\/mrpiracy94\.github\.io\/"\)/);
+  assert.match(js, /const publicCatalogBase = catalogBase;/);
   assert.match(js, /fetch\(new URL\(filename, publicCatalogBase\)/);
+  assert.doesNotMatch(js, /const publicCatalogBase = new URL\("https:\/\/mrpiracy94\.github\.io\/"\)/);
+  assert.match(js, /release\.certification !== "security_scanned"/);
   assert.doesNotMatch(js, /fetch\("\.\/index\.json"/);
   assert.match(html, /https:\/\/mrpiracy94\.github\.io\/MrStore\/store\.json/);
 });
@@ -77,7 +79,7 @@ test("erros de rede não deixam o site preso em carregamento", () => {
 test("não apresenta aprovação quando o relatório está ausente ou não coincide", () => {
   assert.match(js, /state\.validated = verifyRelease\(/);
   assert.match(js, /state\.validated = false/);
-  assert.match(js, /não as interpretes como aprovadas pela auditoria/);
+  assert.match(js, /edição é editorial e não equivale a uma certificação/);
   assert.match(js, /catalogBase\.origin/);
 });
 
