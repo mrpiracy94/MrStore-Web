@@ -17,6 +17,8 @@
     favoritesOnly: false, limit: BATCH_SIZE, saved: new Set(), validated: false };
   // Catalog stays in the original MrStore repository and is hosted on the same origin.
   const catalogBase = new URL(STORE_URL + "/");
+  // A montra principal publica a seleção editorial de 223 apps.
+  const publicCatalogBase = new URL("https://mrpiracy94.github.io/");
   function readFavorites() {
     try {
       const value = JSON.parse(localStorage.getItem("mrstore-favorites-v1") || "[]");
@@ -232,7 +234,7 @@
     const controller = new AbortController();
     const timer = window.setTimeout(function () { controller.abort(); }, 12000);
     try {
-      const response = await fetch(new URL(filename, catalogBase), {
+      const response = await fetch(new URL(filename, publicCatalogBase), {
         cache: "no-store", signal: controller.signal
       });
       if (!response.ok) throw new Error("HTTP " + response.status);
