@@ -12,8 +12,9 @@ const STORE = "https://mrpiracy94.github.io/MrStore/";
 test("site independente aponta para o catálogo técnico original", () => {
   assert.match(js, /const STORE_URL = "https:\/\/mrpiracy94\.github\.io\/MrStore"/);
   assert.match(js, /const catalogBase = new URL\(STORE_URL \+ "\/"\)/);
-  assert.match(js, /fetch\(new URL\("index\.json", catalogBase\)/);
-  assert.match(js, /fetch\(new URL\("release-status\.json", catalogBase\)/);
+  assert.match(js, /getCatalogJSON\("index\.json"\)/);
+  assert.match(js, /getCatalogJSON\("release-status\.json"\)/);
+  assert.match(js, /fetch\(new URL\(filename, catalogBase\)/);
   assert.doesNotMatch(js, /fetch\("\.\/index\.json"/);
   assert.match(html, /https:\/\/mrpiracy94\.github\.io\/MrStore\/store\.json/);
 });
