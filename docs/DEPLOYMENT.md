@@ -25,8 +25,9 @@ resolvidos apenas sob `/MrStore/apps/`. A CSP continua restrita a
 `'self'`, sem dependências CDN.
 
 Se o catálogo estiver indisponível, a montra apresenta erro em vez de
-fabricar aplicações. Se o relatório de release estiver ausente ou não
-corresponder exatamente ao índice, **não apresenta segurança verificada**.
+fabricar aplicações. As **254 aplicações atuais** (e futuras adições) são lidas
+diretamente de `/MrStore/index.json`, sem copiar o snapshot da homepage raiz.
+Um relatório em estado `not_assessed` não representa segurança verificada.
 
 ## Testar
 

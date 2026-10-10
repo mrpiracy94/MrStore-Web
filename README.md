@@ -23,7 +23,7 @@ O catálogo, os manifests Docker Compose, a auditoria CVE e a publicação segur
 
 A montra consulta os dados de origem com JavaScript e **nunca duplica nem altera o catálogo**. Ambos os endereços partilham o domínio `mrpiracy94.github.io`, permitindo aceder a índices e imagens com a política `connect-src 'self'` e `img-src 'self'`. Para uma pré-visualização local fora desse domínio, é necessário um servidor de desenvolvimento que sirva/proxie ambos os caminhos.
 
-O browser valida os IDs e a consistência entre `index.json` e `release-status.json`. Sem evidência válida, apresenta aviso claro de segurança, sem declarar aplicações aprovadas.
+O browser usa sempre o índice técnico `/MrStore/index.json` para listar **todas** as aplicações disponíveis, sem uma lista própria limitada. O relatório `release-status.json` informa separadamente se uma edição foi auditada; `not_assessed` nunca é apresentado como certificação.
 
 ## Design e funcionalidades
 
