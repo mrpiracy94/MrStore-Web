@@ -3,6 +3,8 @@ name: Publish MrStore-Web
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -22,6 +24,7 @@ jobs:
         run: node --test tests/site.test.mjs
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: test
     runs-on: ubuntu-latest
     permissions:
