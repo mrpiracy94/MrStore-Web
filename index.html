@@ -124,7 +124,8 @@
         <button class="favorites-toggle" id="favorites-toggle" type="button" aria-pressed="false" title="Mostrar favoritos guardados neste navegador">☆ <span>Favoritos</span></button>
         <button class="clear-filters" id="clear-filters" type="button" disabled>Limpar filtros</button>
       </div>
-      <div id="catalog-alert" class="notice" role="status" hidden></div>
+      <div id="catalog-alert" class="notice" role="status" aria-live="polite" hidden></div>
+      <div class="catalog-recovery"><button id="retry-catalog" type="button" hidden>↻ Voltar a verificar o catálogo</button></div>
       <div id="catalog-state" class="catalog-state" role="status" aria-live="polite">A carregar aplicações…</div>
       <div class="app-grid" id="app-grid" aria-label="Resultados do catálogo"></div>
       <div class="load-more-wrap"><button id="load-more" class="btn btn-more" type="button" hidden>Mostrar mais aplicações ↓</button></div>
