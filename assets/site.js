@@ -58,8 +58,9 @@
     const src = safePath(app.icon);
     if (src) {
       const img = document.createElement("img");
-      img.src = src; img.alt = ""; img.loading = "lazy";
+      img.alt = ""; img.loading = "lazy";
       img.addEventListener("error", function () { img.remove(); wrap.textContent = "✦"; }, { once: true });
+      img.src = src;
       wrap.appendChild(img);
     } else wrap.textContent = "✦";
     return wrap;
@@ -108,9 +109,9 @@
     }
     if (screenshotURL && /\.(?:png|jpe?g|webp|avif)$/i.test(new URL(screenshotURL).pathname)) {
       const shot = document.createElement("img");
-      shot.src = screenshotURL;
       shot.loading = "lazy"; shot.decoding = "async"; shot.alt = "";
       shot.addEventListener("error", coverFallback, { once: true });
+      shot.src = screenshotURL;
       cover.appendChild(shot);
     } else coverFallback();
     card.appendChild(cover);
@@ -224,31 +225,81 @@
     const expected = new Set(release.approved.map(function (s) { return PREFIX + s; }));
     return expected.size === appList.length && appList.every(function (app) { return expected.has(app.id); });
   }
-  async function initialize() {
-    $("store-address").textContent = STORE_URL;
-    let index;
+  let catalogLoading = false;
+
+  // A stalled network must not leave the website indefinitely in "A carregar".
+  async function getCatalogJSON(filename) {
+    const controller = new AbortController();
+    const timer = window.setTimeout(function () { controller.abort(); }, 12000);
     try {
-      const response = await fetch(new URL("index.json", catalogBase), { cache: "no-store" });
+      const response = await fetch(new URL(filename, catalogBase), {
+        cache: "no-store", signal: controller.signal
+      });
       if (!response.ok) throw new Error("HTTP " + response.status);
-      index = await response.json(); state.apps = validateIndex(index);
-    } catch (_) {
-      setNotice("Não foi possível carregar o índice da MrStore. O catálogo público pode ainda estar a ser publicado. Consulta o GitHub Actions para o estado do release.", true);
-      $("catalog-state").textContent = "Catálogo indisponível.";
-      $("results-summary").textContent = "Indisponível"; return;
+      return await response.json();
+    } finally {
+      window.clearTimeout(timer);
     }
-    $("total-apps").textContent = String(state.apps.length);
-    try {
-      const reply = await fetch(new URL("release-status.json", catalogBase), { cache: "no-store" });
-      if (!reply.ok) throw new Error("Sem relatório de publicação");
-      state.validated = verifyRelease(await reply.json(), state.apps);
-    } catch (_) { state.validated = false; }
-    if (state.validated) {
-      setNotice("Catálogo publicado a partir da seleção aprovada pelo processo automático de verificação do MrStore. Um scan sem alertas conhecidos não garante ausência absoluta de vulnerabilidades; confirma os requisitos antes de instalar.", false);
-    } else {
-      setNotice("Esta edição pública não inclui evidência completa de quarentena, ou existe uma divergência entre o índice e os relatórios. Podes consultar as fichas, mas NÃO interpretes estas aplicações como aprovadas pelos scanners atuais. Verifica os relatórios no GitHub antes de instalar.", true);
-    }
-    categoryList(); render();
   }
+
+  async function initialize() {
+    if (catalogLoading) return;
+    catalogLoading = true;
+    const retry = $("retry-catalog");
+    retry.disabled = true;
+    retry.hidden = true;
+    $("store-address").textContent = STORE_URL;
+    setNotice("", false);
+    if (!state.apps.length) {
+      $("catalog-state").hidden = false;
+      $("catalog-state").textContent = "A carregar catálogo…";
+      $("results-summary").textContent = "A carregar…";
+    }
+    try {
+      let index;
+      try {
+        index = await getCatalogJSON("index.json");
+        state.apps = validateIndex(index);
+      } catch (error) {
+        const detail = error && error.name === "AbortError"
+          ? "O pedido demorou demasiado tempo."
+          : "O índice não está acessível ou não é válido.";
+        setNotice("Não foi possível atualizar o catálogo da MrStore. " + detail +
+          " Verifica a publicação no GitHub Actions e tenta novamente.", true);
+        retry.hidden = false;
+        if (!state.apps.length) {
+          $("catalog-state").hidden = false;
+          $("catalog-state").textContent = "Catálogo temporariamente indisponível.";
+          $("results-summary").textContent = "Indisponível";
+        }
+        return;
+      }
+
+      $("total-apps").textContent = String(state.apps.length);
+      state.validated = false;
+      try {
+        state.validated = verifyRelease(
+          await getCatalogJSON("release-status.json"), state.apps
+        );
+      } catch (_) {
+        // The public technical catalog may predate release evidence.
+        // Never infer approval from a successful index fetch alone.
+        state.validated = false;
+      }
+      if (state.validated) {
+        setNotice("Catálogo publicado com seleção consistente com o relatório de verificação. Nenhum scanner garante ausência absoluta de vulnerabilidades; confirma os requisitos antes de instalar.", false);
+      } else {
+        setNotice("Catálogo acessível, mas sem relatório de publicação correspondente e verificável. Podes explorar as aplicações, mas não as interpretes como aprovadas pela auditoria de segurança atual.", true);
+        retry.hidden = false;
+      }
+      categoryList();
+      render();
+    } finally {
+      catalogLoading = false;
+      retry.disabled = false;
+    }
+  }
+
   $("search").addEventListener("input", function (event) { state.query = event.target.value; state.limit = BATCH_SIZE; render(); });
   $("architecture").addEventListener("change", function (event) { state.arch = event.target.value; state.limit = BATCH_SIZE; render(); });
   $("favorites-toggle").addEventListener("click", function () {
@@ -265,6 +316,7 @@
     categoryList(); render();
     $("search").focus();
   });
+  $("retry-catalog").addEventListener("click", initialize);
   $("load-more").addEventListener("click", function () { state.limit += BATCH_SIZE; render(); });
   $("details-close").addEventListener("click", function () { $("details").close(); });
   document.addEventListener("keydown", function (event) {

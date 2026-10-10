@@ -523,3 +523,13 @@ body{background:#10151d;overflow-x:hidden}
 .installation-technical a{color:#ffbc80;text-decoration:underline;text-underline-offset:3px;font-weight:800}
 .installation-technical a:hover{color:#ffe0b6}
 @media(max-width:520px){.installation-technical{font-size:11px!important}}
+
+/* Estado de recuperação quando o índice ou a prova de publicação não estão disponíveis. */
+.catalog-recovery{display:flex;align-items:center;justify-content:flex-start;margin:12px 0 18px}
+.catalog-recovery button{border:1px solid #885a3d;background:#2f2421;color:#ffca9a;
+  padding:11px 16px;border-radius:11px;font-size:12px;font-weight:800;transition:background .15s,border-color .15s}
+.catalog-recovery button:hover:not(:disabled){background:#473027;border-color:#ffa15c}
+.catalog-recovery button:disabled{opacity:.5;cursor:wait}
+.catalog-recovery [hidden]{display:none!important}
+.catalog-recovery button:focus-visible{outline:3px solid #ffc06b;outline-offset:3px}
+@media(max-width:520px){.catalog-recovery button{width:100%;min-height:44px}}

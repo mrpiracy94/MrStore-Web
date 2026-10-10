@@ -12,8 +12,9 @@ const STORE = "https://mrpiracy94.github.io/MrStore/";
 test("site independente aponta para o catálogo técnico original", () => {
   assert.match(js, /const STORE_URL = "https:\/\/mrpiracy94\.github\.io\/MrStore"/);
   assert.match(js, /const catalogBase = new URL\(STORE_URL \+ "\/"\)/);
-  assert.match(js, /fetch\(new URL\("index\.json", catalogBase\)/);
-  assert.match(js, /fetch\(new URL\("release-status\.json", catalogBase\)/);
+  assert.match(js, /getCatalogJSON\("index\.json"\)/);
+  assert.match(js, /getCatalogJSON\("release-status\.json"\)/);
+  assert.match(js, /fetch\(new URL\(filename, catalogBase\)/);
   assert.doesNotMatch(js, /fetch\("\.\/index\.json"/);
   assert.match(html, /https:\/\/mrpiracy94\.github\.io\/MrStore\/store\.json/);
 });
@@ -60,4 +61,30 @@ test("banner e logotipo são recursos locais", () => {
   assert.match(text("assets/mark.svg"), /<svg/);
   assert.match(html, /\.\/assets\/mrstore-hero\.webp/);
   assert.ok(statSync(new URL("../index.html", import.meta.url)).size > 1000);
+});
+
+test("erros de rede não deixam o site preso em carregamento", () => {
+  assert.match(js, /new AbortController\(\)/);
+  assert.match(js, /controller\.abort\(\)/);
+  assert.match(js, /window\.clearTimeout\(timer\)/);
+  assert.match(js, /retry\.hidden = false/);
+  assert.match(js, /\$\("retry-catalog"\)\.addEventListener\("click", initialize\)/);
+  assert.match(html, /id="retry-catalog"[^>]*hidden/);
+  assert.match(css, /\.catalog-recovery \[hidden\]\{display:none!important\}/);
+});
+
+test("não apresenta aprovação quando o relatório está ausente ou não coincide", () => {
+  assert.match(js, /state\.validated = verifyRelease\(/);
+  assert.match(js, /state\.validated = false/);
+  assert.match(js, /não as interpretes como aprovadas pela auditoria/);
+  assert.match(js, /catalogBase\.origin/);
+});
+
+test("ícones e capturas registam o tratamento de erro antes de carregar a imagem", () => {
+  const imgBlock = js.slice(js.indexOf('const img = document.createElement("img")'),
+                            js.indexOf('return wrap;'));
+  assert.ok(imgBlock.indexOf('img.addEventListener("error"') < imgBlock.indexOf("img.src = src"));
+  const coverBlock = js.slice(js.indexOf('const shot = document.createElement("img")'),
+                              js.indexOf("cover.appendChild(shot)"));
+  assert.ok(coverBlock.indexOf('shot.addEventListener("error"') < coverBlock.indexOf("shot.src = screenshotURL"));
 });
