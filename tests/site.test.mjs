@@ -14,7 +14,8 @@ test("site independente aponta para o catálogo técnico original", () => {
   assert.match(js, /const catalogBase = new URL\(STORE_URL \+ "\/"\)/);
   assert.match(js, /getCatalogJSON\("index\.json"\)/);
   assert.match(js, /getCatalogJSON\("release-status\.json"\)/);
-  assert.match(js, /fetch\(new URL\(filename, catalogBase\)/);
+  assert.match(js, /const publicCatalogBase = new URL\("https:\/\/mrpiracy94\.github\.io\/"\)/);
+  assert.match(js, /fetch\(new URL\(filename, publicCatalogBase\)/);
   assert.doesNotMatch(js, /fetch\("\.\/index\.json"/);
   assert.match(html, /https:\/\/mrpiracy94\.github\.io\/MrStore\/store\.json/);
 });
